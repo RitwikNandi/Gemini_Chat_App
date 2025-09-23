@@ -1,6 +1,7 @@
 ﻿using MaIN.Core;
 using MaIN.Core.Hub;
 using MaIN.Domain.Configuration;
+using Microsoft.AspNetCore.Components.Web;
 
 var geminiApiKey = Environment.GetEnvironmentVariable("Gemini_API_Key");
 
@@ -19,26 +20,57 @@ MaINBootstrapper.Initialize(configureSettings: (options) =>
 var chat = AIHub.Chat()
     .WithModel("gemini-2.0-flash");
 
-Console.WriteLine("Welcome to Console_Chat... \nPowered by Gemini... \nType 'exit' to end the conversation.\n");
+Console.ForegroundColor = ConsoleColor.Cyan;
+Console.WriteLine("Welcome to Console_Chat... \nPowered by Gemini... \nPresented by Sleepy_Monkey 🐵... aka Ritwik Nandi... \nType 'exit' to end the conversation.\n");
+Console.ResetColor();
+
 
 while (true)
 {
     Console.Write("_You:");
+    Console.ForegroundColor = ConsoleColor.Yellow;
     var question = Console.ReadLine();
+    Console.ResetColor();
 
-    if(question.ToLower() == "exit")
+
+    if (question.ToLower() == "exit")
     {
         Console.WriteLine("\nGoodbye");
         break;
     }
 
-    Console.WriteLine("Gemini Thinking...");
+    int currentCursorLeft = Console.CursorLeft;
+    int currentCursorTop = Console.CursorTop;
+    Console.Write("Gemini Thinking...\n");
+    Thread.Sleep(1000);
 
     var response = await chat
         .WithMessage(question)
-        .CompleteAsync(interactive: true);
+        .CompleteAsync(interactive: false);
 
-    //Console.WriteLine("_Gemini: ");
-    //Console.WriteLine(response.Message.Content);
-    ////Console.WriteLine();
+    Console.SetCursorPosition(currentCursorLeft, currentCursorTop);
+    Console.Write(new string(' ', "Gemini Thinking...".Length));
+    Console.SetCursorPosition(currentCursorLeft, currentCursorTop);
+
+
+
+    Console.Write("_Gemini: ");
+    Console.ForegroundColor = ConsoleColor.Green;
+
+    foreach (char c in response.Message.Content)
+    {
+        if (Console.KeyAvailable)
+        {
+            var key = Console.ReadKey(true);
+            if (key.KeyChar == ' ')
+            {
+                break;
+            }
+        }
+
+        Console.Write(c);
+        Thread.Sleep(1);
+    }
+    Console.ResetColor();
+    Console.WriteLine();
 }
